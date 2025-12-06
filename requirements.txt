@@ -1,0 +1,30 @@
+# Core
+python-dotenv
+pyyaml
+loguru
+
+# Data + distributed processing
+pandas>=2.0
+dask[dataframe]>=2023.3
+pyarrow
+
+# Geo / parsing
+geohash2
+
+# ML
+scikit-learn
+lightgbm
+
+# API
+fastapi
+uvicorn
+
+# Monitoring
+prometheus-client
+
+# Testing
+pytest
+pytest-cov
+
+# Orchestration
+apache-airflow==2.8.2

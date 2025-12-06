@@ -1,0 +1,7 @@
+{
+  "name": "Taxi ML Dev Container",
+  "dockerComposeFile": "../infra/docker-compose.yaml",
+  "service": "dev",
+  "workspaceFolder": "/app",
+  "shutdownAction": "stopCompose"
+}

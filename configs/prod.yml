@@ -1,0 +1,20 @@
+environment: prod
+
+paths:
+  raw_data: /app/data/raw/train.csv
+  processed_data: /app/data/processed/trajectories.parquet
+  models: /app/models
+
+preprocessing:
+  geohash_precision: 6
+  min_trip_length: 3
+  dask_blocksize: "128MB"
+
+training:
+  test_size: 0.1
+  random_state: 1312
+  model_type: lightgbm
+
+api:
+  host: 0.0.0.0
+  port: 8000
