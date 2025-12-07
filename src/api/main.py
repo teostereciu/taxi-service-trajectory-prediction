@@ -1,10 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from prometheus_client import generate_latest
 from starlette.responses import Response
 
 from src.api.schemas import PredictionRequest, PredictionResponse
 from src.api.model import NextNodeModel
 from src.api.features import build_feature_row
+from src.api.graph import TransitionGraph
 from src.api.metrics import (
     REQUEST_COUNTER,
     ERROR_COUNTER,
@@ -13,9 +14,8 @@ from src.api.metrics import (
 )
 
 app = FastAPI()
-
 model = NextNodeModel()
-
+graph = TransitionGraph()
 
 @app.post("/predict_next_node")
 def predict_next_node(req: PredictionRequest):
@@ -41,6 +41,16 @@ def predict_next_node(req: PredictionRequest):
 @app.get("/metrics")
 def metrics():
     return Response(generate_latest(), media_type="text/plain")
+
+
+@app.get("/graph_node_info/{node}")
+def graph_node_info(node: str):
+    summary = graph.node_summary(node)
+    
+    if summary["degree"] == 0:
+        raise HTTPException(status_code=404, detail="Node not found in graph")
+    
+    return summary
 
 
 @app.get("/health")
