@@ -82,7 +82,16 @@ def train_model(train_df: pd.DataFrame, test_df: pd.DataFrame, model_dir: str):
     model_dir = Path(model_dir)
     model_dir.mkdir(parents=True, exist_ok=True)
 
-    joblib.dump(pipeline, model_dir / "logreg.joblib")
+    joblib.dump(
+        {   
+            "pipeline": pipeline,
+            "metadata": {
+                "top_k": 3,
+                "features": categorical_feats + numeric_feats
+            }
+        },
+        model_dir / "model_bundle.joblib"
+    )
 
     return {
         "accuracy": acc,
