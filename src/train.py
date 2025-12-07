@@ -78,7 +78,7 @@ def train_model(train_df: pd.DataFrame, test_df: pd.DataFrame, model_dir: str):
     print(f"Accuracy:     {acc:.4f}")
     print(f"Top-3 Acc:    {top3:.4f}")
 
-    # --- Save artifacts ---
+    # --- Save artefacts ---
     model_dir = Path(model_dir)
     model_dir.mkdir(parents=True, exist_ok=True)
 
@@ -86,12 +86,20 @@ def train_model(train_df: pd.DataFrame, test_df: pd.DataFrame, model_dir: str):
         {   
             "pipeline": pipeline,
             "metadata": {
+                "version": "1.0.0",
+                "trained_at": pd.Timestamp.utcnow().isoformat(),
                 "top_k": 3,
-                "features": categorical_feats + numeric_feats
+                "features": categorical_feats + numeric_feats,
+                "model_type": "logistic_regression"
+            },
+            "metrics": {
+            "accuracy": acc,
+            "top3_accuracy": top3
             }
         },
-        model_dir / "model_bundle.joblib"
+        model_dir / "logreg_bundle.joblib"
     )
+    
 
     return {
         "accuracy": acc,

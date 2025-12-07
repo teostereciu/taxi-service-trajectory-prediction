@@ -12,7 +12,7 @@ pyarrow
 geohash2
 
 # ML
-scikit-learn
+scikit-learn==1.5.2
 lightgbm
 
 # API
@@ -31,3 +31,4 @@ pytest-cov
 
 # Misc
 email-validator
+dill

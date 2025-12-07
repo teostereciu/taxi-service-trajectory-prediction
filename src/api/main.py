@@ -1,41 +1,62 @@
+import numpy as np
 from fastapi import FastAPI, HTTPException
 from prometheus_client import generate_latest
 from starlette.responses import Response
 
 from src.api.schemas import PredictionRequest, PredictionResponse
 from src.api.model import NextNodeModel
-from src.api.features import build_feature_row
 from src.api.graph import TransitionGraph
 from src.api.metrics import (
     REQUEST_COUNTER,
     ERROR_COUNTER,
     LATENCY_HISTOGRAM,
     NODE_PREDICTION_COUNTER,
+    MODEL_ACCURACY,
+    MODEL_TOP3_ACCURACY,
+    MODEL_INFO,
+    MODEL_CONFIDENCE,
+    MODEL_ENTROPY
 )
 
 app = FastAPI()
 model = NextNodeModel()
 graph = TransitionGraph()
 
+
+@app.on_event("startup")
+def load_model_metadata():
+    bundle = model.bundle  
+
+    MODEL_ACCURACY.set(bundle["metrics"]["accuracy"])
+    MODEL_TOP3_ACCURACY.set(bundle["metrics"]["top3_accuracy"])
+    
+    MODEL_INFO.info({
+        "version": bundle["metadata"]["version"],
+        "model": "logistic_regression",
+        "top_k": str(bundle["metadata"]["top_k"]),
+    })
+
+
 @app.post("/predict_next_node")
 def predict_next_node(req: PredictionRequest):
-    start = time.time()
     REQUEST_COUNTER.inc()
 
-    try:
-        predictions = model.predict_top_k(req.dict(), k=3)
+    with LATENCY_HISTOGRAM.time():
+        try:
+            results = model.predict_top_k(req.dict(), k=3)
+            predictions = results["predictions"]
+            
+            MODEL_CONFIDENCE.observe(results["confidence"])
+            MODEL_ENTROPY.observe(results["entropy"])
+            
+            for p in predictions:
+                NODE_PREDICTION_COUNTER.labels(node=p["node"]).inc()
 
-        for p in predictions:
-            NODE_PREDICTION_COUNTER.labels(node=p["node"]).inc()
+            return predictions
 
-        return predictions
-
-    except Exception:
-        ERROR_COUNTER.inc()
-        raise
-
-    finally:
-        LATENCY_HISTOGRAM.observe(time.time() - start)
+        except Exception:
+            ERROR_COUNTER.inc()
+            raise
 
 
 @app.get("/metrics")
@@ -55,4 +76,8 @@ def graph_node_info(node: str):
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {
+        "status": "ok",
+        "model_version": model.bundle["metadata"]["version"],
+        "top_k": model.bundle["metadata"]["top_k"],
+    }
