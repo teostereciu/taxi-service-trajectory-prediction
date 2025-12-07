@@ -28,3 +28,6 @@ pytest-cov
 
 # Orchestration
 apache-airflow==2.8.2
+
+# Misc
+email-validator

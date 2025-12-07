@@ -3,5 +3,5 @@
   "dockerComposeFile": "../infra/docker-compose.yaml",
   "service": "dev",
   "workspaceFolder": "/app",
-  "shutdownAction": "stopCompose"
+  "shutdownAction": "stopCompose",
 }

@@ -103,8 +103,8 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Train next-node prediction model")
-    parser.add_argument("--train", required=True, help="Train parquet path")
-    parser.add_argument("--test", required=True, help="Test parquet path")
+    parser.add_argument("--train_path", required=True, help="Train parquet path")
+    parser.add_argument("--test_path", required=True, help="Test parquet path")
     parser.add_argument("--model_dir", default="models", help="Output model directory")
 
     args = parser.parse_args()
