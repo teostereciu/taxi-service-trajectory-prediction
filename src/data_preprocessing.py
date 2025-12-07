@@ -123,12 +123,12 @@ def preprocess_dataset(
     df = df.drop(columns=["geohash_sequence"])
     df = df.rename(columns={"geohash_sequence_str": "geohash_sequence"})
     
-    split_quantile = 0.8
-    split_ts = df["TIMESTAMP"].quantile(split_quantile).compute()
-    df["split"] = df["TIMESTAMP"].apply(
-        lambda ts: "train" if ts < split_ts else "test", 
-        meta=("split", "object")
-        )
+    #split_quantile = 0.8
+    #split_ts = df["TIMESTAMP"].quantile(split_quantile).compute()
+    #df["split"] = df["TIMESTAMP"].apply(
+    #    lambda ts: "train" if ts < split_ts else "test", 
+    #    meta=("split", "object")
+    #    )
 
     df_out = df[[
         "TRIP_ID",
@@ -137,18 +137,20 @@ def preprocess_dataset(
         "hour",
         "day_of_week",
         "geohash_sequence",
-        "split"
+        #"split"
     ]]
 
     Path(output_parquet).parent.mkdir(parents=True, exist_ok=True)
-    train_path = Path(output_parquet) / "train"
-    test_path = Path(output_parquet) / "test"
+    #train_path = Path(output_parquet) / "train"
+    #test_path = Path(output_parquet) / "test"
 
-    df_out[df_out["split"] == "train"].drop(columns=["split"]) \
-        .to_parquet(train_path, write_index=False)
+    #df_out[df_out["split"] == "train"].drop(columns=["split"]) \
+    #    .to_parquet(train_path, write_index=False)
 
-    df_out[df_out["split"] == "test"].drop(columns=["split"]) \
-        .to_parquet(test_path, write_index=False)
+    #df_out[df_out["split"] == "test"].drop(columns=["split"]) \
+    #    .to_parquet(test_path, write_index=False)
+    
+    df_out.to_parquet(Path(output_parquet), write_index=False)
 
     return output_parquet
 
