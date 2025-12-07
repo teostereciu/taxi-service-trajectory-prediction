@@ -99,6 +99,21 @@ def train_model(train_df: pd.DataFrame, test_df: pd.DataFrame, model_dir: str):
     }
 
 
+def train_model_from_paths(
+    train_path: str,
+    test_path: str,
+    model_dir: str,
+):
+    train_df = load_data(train_path)
+    test_df = load_data(test_path)
+
+    return train_model(
+        train_df=train_df,
+        test_df=test_df,
+        model_dir=model_dir,
+    )
+
+
 if __name__ == "__main__":
     import argparse
 

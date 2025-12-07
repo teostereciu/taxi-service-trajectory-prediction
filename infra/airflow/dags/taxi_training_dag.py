@@ -4,8 +4,8 @@ from datetime import datetime
 
 from src.data_preprocessing import preprocess_dataset
 from src.feature_engineering import build_feature_table
-from src.train import train_model
-from src.graph_builder import build_transition_graph
+from src.train import train_model_from_paths
+from src.graph_builder import build_and_save_graph
 
 PROJECT_DIR = "/app"
 
@@ -18,8 +18,7 @@ default_args = {
 with DAG(
     dag_id="taxi_next_node_training",
     default_args=default_args,
-    start_date=datetime(2024, 1, 1),
-    schedule_interval=None,  # manual trigger
+    #start_date=datetime(2024, 1, 1),
     catchup=False,
 ) as dag:
 
@@ -27,7 +26,7 @@ with DAG(
         task_id="preprocess_trips",
         python_callable=preprocess_dataset,
         op_kwargs={
-            "input_csv": f"{PROJECT_DIR}/data/raw/train.csv",
+            "input_csv": f"{PROJECT_DIR}/data/raw/Porto_taxi_data_test_partial_trajectories.csv",
             "output_parquet": f"{PROJECT_DIR}/data/preprocessed/trips",
         },
     )
@@ -36,14 +35,14 @@ with DAG(
         task_id="build_transition_features",
         python_callable=build_feature_table,
         op_kwargs={
-            "input": f"{PROJECT_DIR}/data/preprocessed/trips",
-            "output": f"{PROJECT_DIR}/data/transitions",
+            "input_dir": f"{PROJECT_DIR}/data/preprocessed/trips",
+            "output_dir": f"{PROJECT_DIR}/data/transitions",
         },
     )
 
     build_graph = PythonOperator(
         task_id="build_graph",
-        python_callable=build_transition_graph,
+        python_callable=build_and_save_graph,
         op_kwargs={
             "input_parquet": f"{PROJECT_DIR}/data/transitions/train",
             "output_path": f"{PROJECT_DIR}/artefacts/train_graph.json",
@@ -52,7 +51,7 @@ with DAG(
 
     train = PythonOperator(
         task_id="train_model",
-        python_callable=train_model,
+        python_callable=train_model_from_paths,
         op_kwargs={
             "train_path": f"{PROJECT_DIR}/data/transitions/train",
             "test_path": f"{PROJECT_DIR}/data/transitions/test",
