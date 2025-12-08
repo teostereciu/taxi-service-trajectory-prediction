@@ -1,0 +1,27 @@
+groups:
+- name: taxi-api-alerts
+  rules:
+
+  - alert: TaxiApiDown
+    expr: up{job="taxi_api"} == 0
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "Taxi API is DOWN"
+
+  - alert: HighErrorRate
+    expr: rate(prediction_errors_total[1m]) > 0
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Prediction errors detected"
+
+  - alert: HighLatency
+    expr: histogram_quantile(0.95, rate(prediction_latency_seconds_bucket[1m])) > 1
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High prediction latency (>1s p95)"
