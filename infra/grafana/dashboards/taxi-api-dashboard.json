@@ -1,0 +1,55 @@
+{
+    "id": null,
+    "uid": "taxi-api",
+    "title": "Taxi ML – API & Model Monitoring",
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "panels": [
+      {
+        "type": "timeseries",
+        "title": "Prediction Request Rate",
+        "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "rate(prediction_requests_total[1m])",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "type": "timeseries",
+        "title": "Prediction Latency p95",
+        "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(prediction_latency_seconds_bucket[5m]))",
+            "refId": "B"
+          }
+        ]
+      },
+      {
+        "type": "timeseries",
+        "title": "Prediction Confidence (median)",
+        "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.5, rate(model_prediction_confidence_bucket[5m]))",
+            "refId": "C"
+          }
+        ]
+      },
+      {
+        "type": "timeseries",
+        "title": "Prediction Entropy (median)",
+        "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.5, rate(model_prediction_entropy_bucket[5m]))",
+            "refId": "D"
+          }
+        ]
+      }
+    ]
+  }
+  
