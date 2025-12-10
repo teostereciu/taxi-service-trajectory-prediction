@@ -1,3 +1,4 @@
+import numpy as np
 import dask.dataframe as dd
 import pandas as pd
 from pathlib import Path
@@ -11,6 +12,17 @@ def split_sequence(seq: str) -> List[str]:
     if not seq or pd.isna(seq):
         return []
     return seq.split(" ")
+
+
+def time_bucket(hour: int) -> str:
+    if 5 <= hour < 10:
+        return "morning"
+    elif 10 <= hour < 16:
+        return "afternoon"
+    elif 16 <= hour < 22:
+        return "evening"
+    else:
+        return "night"
 
 
 def explode_trip_into_transitions(df: pd.DataFrame) -> pd.DataFrame:
@@ -27,15 +39,36 @@ def explode_trip_into_transitions(df: pd.DataFrame) -> pd.DataFrame:
         # Need at least 3 nodes for (prev, curr) -> next
         if len(seq) < 3:
             continue
+        
+        hour = int(row["hour"])
+        dow = int(row["day_of_week"])
+        
+        rows_time = {
+            # cyclical hour
+            "hour_sin": np.sin(2 * np.pi * hour / 24),
+            "hour_cos": np.cos(2 * np.pi * hour / 24),
+
+            # yclical day of week
+            "dow_sin": np.sin(2 * np.pi * dow / 7),
+            "dow_cos": np.cos(2 * np.pi * dow / 7),
+
+            # semantic
+            "time_bucket": time_bucket(hour),
+            "is_weekend": int(dow >= 5),
+        }
 
         for i in range(len(seq) - 2):
+            
+            # relative trip position
+            step_frac = i / max(len(seq) - 3, 1)
+            
             rows.append({
                 "prev_node": seq[i],
                 "curr_node": seq[i + 1],
-                "hour": int(row["hour"]),
-                "day_of_week": int(row["day_of_week"]),
                 "call_type": row["CALL_TYPE"],
-                "target_node": seq[i + 2]
+                "target_node": seq[i + 2],
+                **rows_time,
+                "step_frac": step_frac,
             })
 
     if not rows:
@@ -43,10 +76,15 @@ def explode_trip_into_transitions(df: pd.DataFrame) -> pd.DataFrame:
             columns=[
                 "prev_node",
                 "curr_node",
-                "hour",
-                "day_of_week",
                 "call_type",
-                "target_node"
+                "target_node",
+                "hour_sin",
+                "hour_cos",
+                "dow_sin",
+                "dow_cos",
+                "time_bucket",
+                "is_weekend",
+                "step_frac",
             ]
         )
 
@@ -74,10 +112,17 @@ def build_feature_table(
         meta={
             "prev_node": "object",
             "curr_node": "object",
-            "hour": "int64",
-            "day_of_week": "int64",
             "call_type": "object",
-            "target_node": "object"
+            "target_node": "object",
+
+            "hour_sin": "float64",
+            "hour_cos": "float64",
+            "dow_sin": "float64",
+            "dow_cos": "float64",
+
+            "time_bucket": "object",
+            "is_weekend": "int64",   
+            "step_frac": "float64"
         }
     )
     
