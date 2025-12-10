@@ -30,8 +30,21 @@ def train_model(train_df: pd.DataFrame, test_df: pd.DataFrame, model_dir: str):
     X_test = test_df.drop(columns=["target_node"])
     y_test = test_df["target_node"]
 
-    categorical_feats = ["prev_node", "curr_node", "call_type"]
-    numeric_feats = ["hour", "day_of_week"]
+    categorical_feats = [
+        "prev_node",
+        "curr_node",
+        "call_type",
+        "time_bucket",
+    ]
+
+    numeric_feats = [
+        "hour_sin",
+        "hour_cos",
+        "dow_sin",
+        "dow_cos",
+        "is_weekend",
+        "step_frac",
+    ]
 
     preprocessor = ColumnTransformer(
         transformers=[

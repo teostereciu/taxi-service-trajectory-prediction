@@ -18,7 +18,6 @@ default_args = {
 with DAG(
     dag_id="taxi_next_node_training",
     default_args=default_args,
-    #start_date=datetime(2024, 1, 1),
     catchup=False,
 ) as dag:
 
