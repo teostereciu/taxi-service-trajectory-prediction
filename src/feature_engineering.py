@@ -48,7 +48,7 @@ def explode_trip_into_transitions(df: pd.DataFrame) -> pd.DataFrame:
             "hour_sin": np.sin(2 * np.pi * hour / 24),
             "hour_cos": np.cos(2 * np.pi * hour / 24),
 
-            # yclical day of week
+            # cyclical day of week
             "dow_sin": np.sin(2 * np.pi * dow / 7),
             "dow_cos": np.cos(2 * np.pi * dow / 7),
 
