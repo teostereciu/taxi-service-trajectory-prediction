@@ -6,12 +6,10 @@ from datetime import datetime
 
 API_URL = "http://localhost:8000/predict_next_node"
 
-# Core nodes (dominant)
 CORE_NODES = [
     "ez3fhj", "ez3fhk", "ez3fhh", "ez3f5u", "ez3fhn"
 ]
 
-# Rare / edge nodes
 RARE_NODES = [
     "ez3fht", "ez3fhp", "ez3fhm", "ez3f5s"
 ]
@@ -20,7 +18,6 @@ INVALID_NODE = "invalid"
 
 CALL_TYPES = ["A", "B", "C"]
 
-# ---- traffic pattern ----
 
 def current_load_factor(t: float) -> float:
     """
@@ -43,14 +40,12 @@ def maybe_invalid():
     """
     return INVALID_NODE if random.random() < 0.03 else None
 
-# ---- request ----
 
 def make_request(drift_factor: float):
     now = datetime.utcnow()
     hour = now.hour
     dow = now.weekday()
 
-    # Correlated call type
     if 9 <= hour <= 17:
         call_type = random.choices(CALL_TYPES, weights=[0.6, 0.3, 0.1])[0]
     else:
@@ -59,7 +54,6 @@ def make_request(drift_factor: float):
     prev_node = pick_node(drift_factor)
     curr_node = pick_node(drift_factor)
 
-    # Occasionally break things
     if random.random() < 0.05:
         prev_node = maybe_invalid() or prev_node
 
@@ -77,7 +71,6 @@ def make_request(drift_factor: float):
     except Exception as e:
         print("REQUEST ERROR:", e)
 
-# ---- main loop ----
 
 if __name__ == "__main__":
     print("🚕 Sending requests… Ctrl+C to stop")
@@ -87,15 +80,12 @@ if __name__ == "__main__":
     while True:
         elapsed = time.time() - start
 
-        # Drift increases very slowly over time (0 → 0.3)
         drift_factor = min(0.3, elapsed / 600)
 
-        # Traffic pattern
         load = current_load_factor(elapsed)
 
         make_request(drift_factor)
 
-        # Dynamic sleep (bursts & idle)
         base_sleep = random.uniform(0.2, 1.0)
         sleep_time = max(0.1, base_sleep * (1.5 - load))
 

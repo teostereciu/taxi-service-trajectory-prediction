@@ -7,6 +7,7 @@ paths:
   preprocessed: /app/data/preprocessed/
   features: /app/data/features/
   models: /app/models
+  model: /app/models/logreg_bundle.joblib
   artefacts: /app/artefacts
   graph_artefact: /app/artefacts/train_graph.json
 
