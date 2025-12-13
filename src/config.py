@@ -10,6 +10,6 @@ with open(CONFIG_PATH) as f:
     _cfg = yaml.safe_load(f)
 
 PATHS = {k: Path(v) for k, v in _cfg["paths"].items()}
-PREPROCESSING = _cfg["preprocessing"]
-FEATURE_ENG = _cfg["feature_engineering"]
-TRAIN = _cfg["train"]
+PREPROCESSING = _cfg.get("preprocessing", {})
+FEATURE_ENG = _cfg.get("feature_engineering", {})
+TRAIN = _cfg.get("train", {})

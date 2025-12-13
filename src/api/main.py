@@ -17,11 +17,11 @@ from src.api.metrics import (
     MODEL_ENTROPY
 )
 
-from config import PATHS
+from src.config import PATHS
 
 app = FastAPI()
-model = NextNodeModel(model_path=PATHS["model"])
-graph = TransitionGraph(path=PATHS["graph_artefact"])
+model = NextNodeModel()
+graph = TransitionGraph()
 
 
 @app.on_event("startup")

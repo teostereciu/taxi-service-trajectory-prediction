@@ -18,6 +18,7 @@ lightgbm
 # API
 fastapi
 uvicorn
+httpx
 
 # Monitoring
 prometheus-client

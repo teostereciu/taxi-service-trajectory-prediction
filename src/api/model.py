@@ -1,6 +1,7 @@
 from joblib import load
 import numpy as np
-import pandas as pd
+
+from src.api.features import build_serving_features
 
 
 class NextNodeModel:
@@ -21,7 +22,14 @@ class NextNodeModel:
           - day_of_week
           - call_type
         """
-        X = pd.DataFrame([features])
+        
+        X = build_serving_features(
+            prev_node=features["prev_node"],
+            curr_node=features["curr_node"],
+            call_type=features["call_type"],
+            hour=features["hour"],
+            day_of_week=features["day_of_week"],
+        )
 
         probs = self.pipeline.predict_proba(X)[0]
         confidence = float(probs.max())
