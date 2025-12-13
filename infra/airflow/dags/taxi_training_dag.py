@@ -25,7 +25,7 @@ with DAG(
         task_id="preprocess_trips",
         python_callable=preprocess_dataset,
         op_kwargs={
-            "input_csv": f"{PROJECT_DIR}/data/raw/Porto_taxi_data_test_partial_trajectories.csv",
+            "input_csv": f"{PROJECT_DIR}/data/raw/mini_train.csv",
             "output_parquet": f"{PROJECT_DIR}/data/preprocessed/trips",
         },
     )
