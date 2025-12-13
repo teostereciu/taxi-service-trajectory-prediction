@@ -1,0 +1,29 @@
+environment: dev
+
+paths:
+  project_dir: /app
+  data: /app/data
+  raw: /app/data/raw/5000mini_train.csv
+  preprocessed: /app/data/preprocessed/
+  features: /app/data/features/
+  models: /app/models
+  artefacts: /app/artefacts
+  graph_artefact: /app/artefacts/train_graph.json
+
+preprocessing:
+  geohash_precision: 6
+  min_trip_length: 2
+  dask_blocksize: "64MB"
+
+feature_engineering:
+  seed: 1312
+  train_frac: 0.8
+
+training:
+  random_state: 1312
+  model_type: logistic_regression
+  baseline_model: logreg_bundle.joblib
+
+api:
+  host: 0.0.0.0
+  port: 8000

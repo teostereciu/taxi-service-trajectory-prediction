@@ -7,10 +7,12 @@ from src.feature_engineering import build_feature_table
 from src.train import train_model_from_paths
 from src.graph_builder import build_and_save_graph
 
+from src.config import PATHS
+
 PROJECT_DIR = "/app"
 
 default_args = {
-    "owner": "ml-team",
+    "owner": "owner",
     "depends_on_past": False,
     "retries": 1,
 }
@@ -25,8 +27,8 @@ with DAG(
         task_id="preprocess_trips",
         python_callable=preprocess_dataset,
         op_kwargs={
-            "input_csv": f"{PROJECT_DIR}/data/raw/mini_train.csv",
-            "output_parquet": f"{PROJECT_DIR}/data/preprocessed/trips",
+            "input_csv": str(PATHS["raw"]),
+            "output_parquet": str(PATHS["preprocessed"]),
         },
     )
 
@@ -34,8 +36,8 @@ with DAG(
         task_id="build_transition_features",
         python_callable=build_feature_table,
         op_kwargs={
-            "input_dir": f"{PROJECT_DIR}/data/preprocessed/trips",
-            "output_dir": f"{PROJECT_DIR}/data/transitions",
+            "input_dir": str(PATHS["preprocessed"]),
+            "output_dir": str(PATHS["features"]),
         },
     )
 
@@ -43,8 +45,8 @@ with DAG(
         task_id="build_graph",
         python_callable=build_and_save_graph,
         op_kwargs={
-            "input_parquet": f"{PROJECT_DIR}/data/transitions/train",
-            "output_path": f"{PROJECT_DIR}/artefacts/train_graph.json",
+            "input_parquet": str(PATHS["features"] / "train"),
+            "output_path": str(PATHS["graph_artefact"]),
         },
     )
 
@@ -52,9 +54,9 @@ with DAG(
         task_id="train_model",
         python_callable=train_model_from_paths,
         op_kwargs={
-            "train_path": f"{PROJECT_DIR}/data/transitions/train",
-            "test_path": f"{PROJECT_DIR}/data/transitions/test",
-            "model_dir": f"{PROJECT_DIR}/models",
+            "train_path": str(PATHS["features"] / "train"),
+            "test_path": str(PATHS["features"] / "test"),
+            "model_dir": str(PATHS["models"]),
         },
     )
 

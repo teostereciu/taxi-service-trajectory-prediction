@@ -1,8 +1,15 @@
+import os
 import yaml
 from pathlib import Path
 
+ENV = os.getenv("ENV", "dev")
+PROJECT_DIR = Path(os.getenv("PROJECT_DIR", "/app"))
+CONFIG_PATH = PROJECT_DIR / "configs" / f"{ENV}.yaml"
 
-def load_config(env="dev"):
-    config_path = Path(f"/app/configs/{env}.yaml")
-    with open(config_path) as f:
-        return yaml.safe_load(f)
+with open(CONFIG_PATH) as f:
+    _cfg = yaml.safe_load(f)
+
+PATHS = {k: Path(v) for k, v in _cfg["paths"].items()}
+PREPROCESSING = _cfg["preprocessing"]
+FEATURE_ENG = _cfg["feature_engineering"]
+TRAIN = _cfg["train"]

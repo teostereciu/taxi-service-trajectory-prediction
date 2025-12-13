@@ -4,6 +4,8 @@ import pandas as pd
 from pathlib import Path
 from typing import List
 
+from src.config import FEATURE_ENG, PATHS
+
 
 def split_sequence(seq: str) -> List[str]:
     """
@@ -148,9 +150,10 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Feature engineering: build transition table")
-    parser.add_argument("--input", required=True, help="Input parquet (preprocessed trips)")
-    parser.add_argument("--output", required=True, help="Output parquet (training features)")
-    parser.add_argument("--train_frac", type=float, default=0.8)
+    parser.add_argument("--input", default=PATHS["preprocessed"], help="Input parquet (preprocessed trips)")
+    parser.add_argument("--output", default=PATHS["features"], help="Output parquet (features)")
+    parser.add_argument("--train_frac", type=float, default=FEATURE_ENG["train_frac"])
+    parser.add_argument("--seed", type=int, default=FEATURE_ENG["seed"])
 
     args = parser.parse_args()
 
@@ -158,4 +161,5 @@ if __name__ == "__main__":
         input_dir=args.input,
         output_dir=args.output,
         train_frac=args.train_frac,
+        seed=args.seed
     )

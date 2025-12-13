@@ -10,6 +10,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import accuracy_score, top_k_accuracy_score
 
+from src.config import PATHS
 
 def load_data(path: str) -> pd.DataFrame:
     """
@@ -67,7 +68,7 @@ def train_model(train_df: pd.DataFrame, test_df: pd.DataFrame, model_dir: str):
 
     pipeline.fit(X_train, y_train)
 
-    # --- Evaluation ---
+    # Evaluation 
     y_pred = pipeline.predict(X_test)
     y_proba = pipeline.predict_proba(X_test)
 
@@ -91,7 +92,6 @@ def train_model(train_df: pd.DataFrame, test_df: pd.DataFrame, model_dir: str):
     print(f"Accuracy:     {acc:.4f}")
     print(f"Top-3 Acc:    {top3:.4f}")
 
-    # --- Save artefacts ---
     model_dir = Path(model_dir)
     model_dir.mkdir(parents=True, exist_ok=True)
 
@@ -139,9 +139,9 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Train next-node prediction model")
-    parser.add_argument("--train_path", required=True, help="Train parquet path")
-    parser.add_argument("--test_path", required=True, help="Test parquet path")
-    parser.add_argument("--model_dir", default="models", help="Output model directory")
+    parser.add_argument("--train_path", default=PATHS["features"] / "train", help="Train parquet path")
+    parser.add_argument("--test_path", default=PATHS["features"] / "test", help="Test parquet path")
+    parser.add_argument("--model_dir", default=PATHS["models"], help="Output model directory")
 
     args = parser.parse_args()
 
