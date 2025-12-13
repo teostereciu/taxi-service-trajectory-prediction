@@ -1,19 +1,15 @@
 environment: prod
 
 paths:
-  raw_data: /app/data/raw/train.csv
-  processed_data: /app/data/processed/trajectories.parquet
+  project_dir: /app
+  data: /app/data
+  raw: /app/data/raw/5000mini_train.csv
+  preprocessed: /app/data/preprocessed/
+  features: /app/data/features/
   models: /app/models
-
-preprocessing:
-  geohash_precision: 6
-  min_trip_length: 3
-  dask_blocksize: "128MB"
-
-training:
-  test_size: 0.1
-  random_state: 1312
-  model_type: lightgbm
+  model: /app/models/logreg_bundle.joblib
+  artefacts: /app/artefacts
+  graph_artefact: /app/artefacts/train_graph.json
 
 api:
   host: 0.0.0.0

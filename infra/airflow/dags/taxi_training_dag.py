@@ -9,8 +9,6 @@ from src.graph_builder import build_and_save_graph
 
 from src.config import PATHS
 
-PROJECT_DIR = "/app"
-
 default_args = {
     "owner": "owner",
     "depends_on_past": False,

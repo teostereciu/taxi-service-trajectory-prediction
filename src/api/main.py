@@ -1,9 +1,8 @@
-import numpy as np
 from fastapi import FastAPI, HTTPException
 from prometheus_client import generate_latest
 from starlette.responses import Response
 
-from src.api.schemas import PredictionRequest, PredictionResponse
+from src.api.schemas import PredictionRequest
 from src.api.model import NextNodeModel
 from src.api.graph import TransitionGraph
 from src.api.metrics import (
@@ -18,9 +17,11 @@ from src.api.metrics import (
     MODEL_ENTROPY
 )
 
+from config import PATHS
+
 app = FastAPI()
-model = NextNodeModel()
-graph = TransitionGraph()
+model = NextNodeModel(model_path=PATHS["model"])
+graph = TransitionGraph(path=PATHS["graph_artefact"])
 
 
 @app.on_event("startup")
