@@ -1,7 +1,10 @@
+import numpy as np
 import dask.dataframe as dd
 import pandas as pd
 from pathlib import Path
 from typing import List
+
+from src.config import FEATURE_ENG, PATHS
 
 
 def split_sequence(seq: str) -> List[str]:
@@ -11,6 +14,17 @@ def split_sequence(seq: str) -> List[str]:
     if not seq or pd.isna(seq):
         return []
     return seq.split(" ")
+
+
+def time_bucket(hour: int) -> str:
+    if 5 <= hour < 10:
+        return "morning"
+    elif 10 <= hour < 16:
+        return "afternoon"
+    elif 16 <= hour < 22:
+        return "evening"
+    else:
+        return "night"
 
 
 def explode_trip_into_transitions(df: pd.DataFrame) -> pd.DataFrame:
@@ -27,15 +41,36 @@ def explode_trip_into_transitions(df: pd.DataFrame) -> pd.DataFrame:
         # Need at least 3 nodes for (prev, curr) -> next
         if len(seq) < 3:
             continue
+        
+        hour = int(row["hour"])
+        dow = int(row["day_of_week"])
+        
+        rows_time = {
+            # cyclical hour
+            "hour_sin": np.sin(2 * np.pi * hour / 24),
+            "hour_cos": np.cos(2 * np.pi * hour / 24),
+
+            # cyclical day of week
+            "dow_sin": np.sin(2 * np.pi * dow / 7),
+            "dow_cos": np.cos(2 * np.pi * dow / 7),
+
+            # semantic
+            "time_bucket": time_bucket(hour),
+            "is_weekend": int(dow >= 5),
+        }
 
         for i in range(len(seq) - 2):
+            
+            # relative trip position
+            step_frac = i / max(len(seq) - 3, 1)
+            
             rows.append({
                 "prev_node": seq[i],
                 "curr_node": seq[i + 1],
-                "hour": int(row["hour"]),
-                "day_of_week": int(row["day_of_week"]),
                 "call_type": row["CALL_TYPE"],
-                "target_node": seq[i + 2]
+                "target_node": seq[i + 2],
+                **rows_time,
+                "step_frac": step_frac,
             })
 
     if not rows:
@@ -43,10 +78,15 @@ def explode_trip_into_transitions(df: pd.DataFrame) -> pd.DataFrame:
             columns=[
                 "prev_node",
                 "curr_node",
-                "hour",
-                "day_of_week",
                 "call_type",
-                "target_node"
+                "target_node",
+                "hour_sin",
+                "hour_cos",
+                "dow_sin",
+                "dow_cos",
+                "time_bucket",
+                "is_weekend",
+                "step_frac",
             ]
         )
 
@@ -74,10 +114,17 @@ def build_feature_table(
         meta={
             "prev_node": "object",
             "curr_node": "object",
-            "hour": "int64",
-            "day_of_week": "int64",
             "call_type": "object",
-            "target_node": "object"
+            "target_node": "object",
+
+            "hour_sin": "float64",
+            "hour_cos": "float64",
+            "dow_sin": "float64",
+            "dow_cos": "float64",
+
+            "time_bucket": "object",
+            "is_weekend": "int64",   
+            "step_frac": "float64"
         }
     )
     
@@ -103,9 +150,10 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Feature engineering: build transition table")
-    parser.add_argument("--input", required=True, help="Input parquet (preprocessed trips)")
-    parser.add_argument("--output", required=True, help="Output parquet (training features)")
-    parser.add_argument("--train_frac", type=float, default=0.8)
+    parser.add_argument("--input", default=PATHS["preprocessed"], help="Input parquet (preprocessed trips)")
+    parser.add_argument("--output", default=PATHS["features"], help="Output parquet (features)")
+    parser.add_argument("--train_frac", type=float, default=FEATURE_ENG["train_frac"])
+    parser.add_argument("--seed", type=int, default=FEATURE_ENG["seed"])
 
     args = parser.parse_args()
 
@@ -113,4 +161,5 @@ if __name__ == "__main__":
         input_dir=args.input,
         output_dir=args.output,
         train_frac=args.train_frac,
+        seed=args.seed
     )

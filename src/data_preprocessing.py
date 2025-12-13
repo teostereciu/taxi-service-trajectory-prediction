@@ -5,6 +5,8 @@ import dask.dataframe as dd
 import pandas as pd
 import geohash2 as geohash
 
+from src.config import PATHS, PREPROCESSING
+
 
 def parse_polyline(polyline_str: str):
     """Parse POLYLINE string into list of [lon, lat] points."""
@@ -122,13 +124,6 @@ def preprocess_dataset(
     
     df = df.drop(columns=["geohash_sequence"])
     df = df.rename(columns={"geohash_sequence_str": "geohash_sequence"})
-    
-    #split_quantile = 0.8
-    #split_ts = df["TIMESTAMP"].quantile(split_quantile).compute()
-    #df["split"] = df["TIMESTAMP"].apply(
-    #    lambda ts: "train" if ts < split_ts else "test", 
-    #    meta=("split", "object")
-    #    )
 
     df_out = df[[
         "TRIP_ID",
@@ -137,32 +132,22 @@ def preprocess_dataset(
         "hour",
         "day_of_week",
         "geohash_sequence",
-        #"split"
     ]]
 
     Path(output_parquet).parent.mkdir(parents=True, exist_ok=True)
-    #train_path = Path(output_parquet) / "train"
-    #test_path = Path(output_parquet) / "test"
-
-    #df_out[df_out["split"] == "train"].drop(columns=["split"]) \
-    #    .to_parquet(train_path, write_index=False)
-
-    #df_out[df_out["split"] == "test"].drop(columns=["split"]) \
-    #    .to_parquet(test_path, write_index=False)
-    
     df_out.to_parquet(Path(output_parquet), write_index=False)
 
-    return output_parquet
+    return str(output_parquet)
 
 
 if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Taxi Dataset Preprocessing")
-    parser.add_argument("--input", required=True, help="Path to raw CSV file")
-    parser.add_argument("--output", required=True, help="Path for output Parquet")
-    parser.add_argument("--precision", type=int, default=6)
-    parser.add_argument("--min_trip_length", type=int, default=2)
+    parser.add_argument("--input", default=PATHS["raw"], help="Path to raw CSV file")
+    parser.add_argument("--output", default=PATHS["preprocessed"], help="Path for output Parquet")
+    parser.add_argument("--precision", type=int, default=PREPROCESSING["geohash_precision"])
+    parser.add_argument("--min_trip_length", type=int, default=PREPROCESSING["min_trip_length"])
 
     args = parser.parse_args()
 
@@ -170,5 +155,5 @@ if __name__ == "__main__":
         input_csv=args.input,
         output_parquet=args.output,
         geohash_precision=args.precision,
-        min_trip_length=args.min_trip_length
+        min_trip_length=args.min_trip_length,
     )

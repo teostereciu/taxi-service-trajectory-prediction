@@ -3,6 +3,7 @@ import dask.dataframe as dd
 from pathlib import Path
 from collections import defaultdict
 
+from src.config import PATHS
 
 def build_transition_graph(df):
     """
@@ -35,8 +36,8 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Build transition graph")
-    parser.add_argument("--input", required=True, help="Transitions parquet path")
-    parser.add_argument("--output", required=True, help="Output graph.json path")
+    parser.add_argument("--input", default=PATHS["features"], help="Transitions parquet path")
+    parser.add_argument("--output", default=PATHS["graph_artefact"], help="Output graph.json path")
 
     args = parser.parse_args()
 
