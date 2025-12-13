@@ -17,7 +17,7 @@ from src.api.metrics import (
     MODEL_ENTROPY
 )
 
-from config import PATHS
+from src.config import PATHS
 
 app = FastAPI()
 model = NextNodeModel(model_path=PATHS["model"])
